@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1556900080624.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "709661636",
+    "id" : "839D8991",
+    "lastKnownWriteTime" : 1557153218,
+    "last_content_update" : 1557153218211,
+    "path" : "~/Personal/master/Principle Data Science/main.R",
+    "project_path" : "main.R",
+    "properties" : {
+        "cursorPosition" : "13,0",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
