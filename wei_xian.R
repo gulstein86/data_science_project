@@ -1,12 +1,11 @@
 #install.packages('shiny')
-library(shiny)
-
-install.packages('shinyjs')
-library(shinyjs)
-
+#install.packages('shinyjs')
 #install.packages('tidyverse')
-library(tidyverse)
 
+library(shiny)
+library(shinyjs)
+library(tidyverse)
+library(leaflet) # Plot maps
 library(readxl)
 
 
@@ -82,8 +81,10 @@ ui <- fluidPage(
         
         # Aswadi
         tabPanel("Interactive Maps", "This is an interactive Map"),
-        
-        
+        # create leaflet map output
+        leafletOutput("mymap"),
+
+
         # WeiXin
         tabPanel(
           title = "County-Infos", 
@@ -194,6 +195,30 @@ server <- function(input, output, session) {
       shinyjs::hide(id="myID")
     }
     
+  })
+  
+  
+  # using leaflet 
+  output$mymap <- renderLeaflet({
+    # leaflet(data = leafmap2) %>% 
+    #   addTiles() %>%
+    #   addPolygons(fillColor = ~pal(population),
+    #               fillOpacity = 0.8,
+    #               color = "#BDBDC3",
+    #               weight = 1,
+    #               popup = popup_dat2) %>%
+    #   addLegend("bottomright", pal = pal, values = ~population,
+    #             title = "State Population, 2009",
+    #             opacity = 1 )
+    
+    #county
+    leaflet(data = leafmap3) %>% 
+      addTiles() %>%
+      addPolygons(fillColor = ~pal(FFR14),
+                  fillOpacity = 0.8,
+                  color = "#BDBDC3",
+                  weight = 1,
+                  popup = popup_dat3)
   })
   
 }

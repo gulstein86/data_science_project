@@ -1,3 +1,9 @@
+install.packages('tidyverse')
+install.packages('readxl')
+install.packages('leaflet')
+install.packages('rgdal')
+
+
 library(tidyverse)
 library(readxl)
 library(leaflet) # Plot maps
@@ -5,7 +11,6 @@ library(rgdal)
 
 df <- read_excel("input/DataDownload - Copy.xlsx", 2)
 worksheet <- df %>% distinct(`Category Code`) %>% pull(`Category Code`)
-
 
 for (sheets in worksheet){
   df_name <- paste('df',sheets,sep='_')
