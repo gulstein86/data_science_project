@@ -5,8 +5,8 @@
 Food Environment Atlas in US
 
 **Member:**
-Aswadi Abdul Rahman
-Peng Hor
-Wei Xian
-Kennedy Tan
+1. Yap Peng Hor WQD180123
+2. Aswadi Abdul Rahman WQD180082
+3. Ng Wei Xin WQD180
+4. Tan Bing Shien WQD180
 
