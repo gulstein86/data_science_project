@@ -1,0 +1,13 @@
+name: app_food
+title: app_food
+username:
+account: aswadi
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 949586
+bundleId: 2109521
+url: https://aswadi.shinyapps.io/app_food/
+when: 1558881781.79752
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app - Copy.R

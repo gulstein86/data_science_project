@@ -16,7 +16,7 @@ library(dplyr)
 
 
 ## PART-1: READING RAW-DATA
-
+  
 # df <- read_excel("input/DataDownload.xls", 2)
 # worksheet <- df %>% distinct(`Category Code`) %>% pull(`Category Code`)
 # 
@@ -73,7 +73,7 @@ ui <- fluidPage(
       uiOutput("in2County"), #renderUI, based on State
       
       selectInput(inputId = "inCategory", "Food-Environment Category:", choices = varCategory, selected = "Local Foods", multiple = FALSE),
-      
+
       uiOutput("in2Indicator"), #renderUI, based on Category
       br(),
       
@@ -198,9 +198,9 @@ server <- function(input, output, session) {
                       color = "#BDBDC3",
                       weight = 1,
                       popup = popup_dat3) %>%
-          addLegend("bottomright", pal = pal, values = ~variable,
-                    title = paste0(filter(df,`Variable Name`==input$inIndicator) %>% distinct(`Variable Name`)),
-                    opacity = 0.5 )
+        addLegend("bottomright", pal = pal, values = ~variable,
+                  title = paste0(filter(df,`Variable Name`==input$inIndicator) %>% distinct(`Variable Name`)),
+                  opacity = 0.5 )
       })
       
     }
@@ -220,7 +220,7 @@ server <- function(input, output, session) {
       
       output$tab2selectedCounty <- renderText(paste("Infos for", input$inCounty, "(County) in", input$inState, "(State)"))
       output$tab2selectedCategory <- renderText(paste("Selected Category:", input$inCategory))
-      
+
       dfCategory <- paste0("df_", filter(df,`Category Name`==input$inCategory) %>% distinct(`Category Code`))
       
       if(dfCategory=="df_ACCESS") {tmpDF <- df_ACCESS}
