@@ -1,0 +1,83 @@
+---
+title: "WQD7001 Principles of Data Science"
+author:
+- =======**THE EAGER HUNTERS**=======    
+- YAP PENG HOR ------------------ WQD180123
+- ASWADI ABDUL RAHMAN ----- WQD180082
+- NG WEI XIN ----------------------- WQD180102
+- TAN BING SHIEN ----------------- WQD180104
+- =================================
+date: "May 27, 2019"
+output:
+  slidy_presentation:
+    footer: FOOD ENVIRONMENT ATLAS
+  ioslides_presentation: default
+subtitle: FOOD ENVIRONMENT ATLAS
+---
+
+# INTRODUCTION
+<h2>This project provides a tool to visualise food environmental situations if the United States in interactive and comprehensive way by using Shiny app.</h2>  
+ </br>
+<h2>The Dataset</h2>  
+1. Consists of 13 sheets.  
+2. There are 3142 rows whereby each row corresponds to each county in the USA.  
+3. There are 277 variables which being stored in 9 seperated sheets based on the respective categories.  
+4. A screenshot of the dataset is shown in the figure below.  
+
+![](./assets/img/dataset.png)
+
+
+---
+
+# DATA SCIENCE AT ONE GLANCE
+
+1. Ask an Interesting Question  
+<h5>How is the food environment in the United States?</h5>  
+2. Finding and Getting the Data  
+<h5>The dataset was found and downloaded at https://www.ers.usda.gov/webdocs/DataFiles/48731/DataDownload.xls?v=0 .</h5>
+3. Exploring the Data
+<h5>The dataset was explored and manipulated interactively to allow users to understand the various aspects of each key indicator.</h5>
+4. Visualising the Results
+<h5>Shiny does the magic. Click next to explore.</h5>
+
+
+---
+
+
+# The Shiny App
+1. Curious about the food environment in the United States?
+2. How about the different **STATES**?
+3. Or details on each individual **COUNTY**?
+4. There are 9 major categories and 277 key indicators in total.
+5. You choose what you wish to know, we show you on the spot!
+
+</br>
+
+<center>**A Screenshot of the Shiny App**</center>  
+![](./assets/img/Shiny.png)
+
+---
+
+
+# EXPERIENCE WHEN DOING THE PROJECT
+1. Better understanding on the food environment of the United States.
+2. R coding skill has been improved.
+3. One of the most powerful app for interactive visualisation i.e. Shiny has been discovered.
+4. Communication skill among team members has been enhanced - one of the essential skills of a data scientist!
+
+</br>
+
+## LINKS 
+1.  [Shiny - Food Environment Atlas](https://wing90.shinyapps.io/fe_atlas_wqd7001/)  
+2.  [GitHub repository](https://github.com/gulstein86/data_science_project)
+
+</br>
+<center>**===========**</center>
+<center>**THANK YOU**</center>
+<center>**===========**</center>
+
+
+
+
+
+

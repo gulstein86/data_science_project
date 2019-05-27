@@ -5,9 +5,9 @@ account: aswadi
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 949590
-bundleId: 2109526
+bundleId: 2110577
 url: https://aswadi.shinyapps.io/food_atlas_1/
-when: 1558882320.44213
+when: 1558937971.81152
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: main.R|README.md|testing_leaflet.R|tmp_Shiny_Exercise.R|wei_xian.R|app/app - Copy.R|app/app.R|app/rsconnect/shinyapps.io/aswadi/app_food.dcf|input
+ignoredFiles: README.md|input|others|Slidify

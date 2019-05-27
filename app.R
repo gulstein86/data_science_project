@@ -13,23 +13,17 @@ library(leaflet) # Plot maps
 library(readxl)
 library(rgdal)
 library(dplyr)
-
+library(plotly) # Plot graph
 
 ## PART-1: READING RAW-DATA
-
+  
 # df <- read_excel("input/DataDownload.xls", 2)
 # worksheet <- df %>% distinct(`Category Code`) %>% pull(`Category Code`)
-# 
+
 # for (sheets in worksheet){
 #  assign(paste("df", sheets, sep = "_"), read_excel("input/DataDownload.xls", sheet = sheets))
 # }
 
-
-
-ls(pattern = "df_[A-Z]*")
-df_list <- mget(x = ls(pattern = "df_[A-Z]*"))
-
-# state_data <- read_excel("input/DataDownload - Copy.xlsx", 4)
 
 # US MAP - COUNTIES
 # us.map.county <- readOGR(dsn= 'input/UScounties', layer = "UScounties", stringsAsFactors = FALSE)
@@ -39,6 +33,9 @@ us.map.county <- us.map.county[!us.map.county$STATE_FIPS %in% c("02", "15", "72"
 us.map.county <- us.map.county[!us.map.county$STATE_FIPS %in% c("81", "84", "86", "87", "89", "71", "76","95", "79"),]
 
 #### PART-2: GENERATE Var-Lists (fixed through run-time) ####
+
+ls(pattern = "df_[A-Z]*")
+df_list <- mget(x = ls(pattern = "df_[A-Z]*"))
 
 varCategory <- df %>% distinct(`Category Name`) %>% pull(`Category Name`)
 varStates <- df_LOCAL %>% distinct(State) %>% pull(State)
@@ -68,13 +65,20 @@ ui <- fluidPage(
       "Please select options:",
       br(),br(),
       
-      selectInput(inputId = "inState", "State:", choices = varStatesName, selected = "Virginia", multiple = FALSE),
+      conditionalPanel("input.tabs != 1",
+                       selectInput(inputId = "inState", "State:", choices = varStatesName, selected = "Virginia", multiple = FALSE)
+      ), 
       
-      uiOutput("in2County"), #renderUI, based on State
+      conditionalPanel("input.tabs == 2",
+                       uiOutput("in2County") #renderUI, based on State
+                       ), 
       
       selectInput(inputId = "inCategory", "Food-Environment Category:", choices = varCategory, selected = "Local Foods", multiple = FALSE),
-      
-      uiOutput("in2Indicator"), #renderUI, based on Category
+
+      conditionalPanel("input.tabs != 2",
+                       uiOutput("in2Indicator") #renderUI, based on Category
+      ), 
+     
       br(),
       
       wellPanel(
@@ -84,10 +88,21 @@ ui <- fluidPage(
         #p("Line2"),
         #p("Selected Category:", input$Category),
         #br()
-        "Selected State:", textOutput(outputId = "infoState"), br(),
-        "Selected County:", textOutput(outputId = "infoCounty"), br(),
+        
+        conditionalPanel("input.tabs != 1",
+                         "Selected State:", textOutput(outputId = "infoState"), br()
+                      
+        ), 
+        
+        conditionalPanel("input.tabs == 2",
+                         "Selected County:", textOutput(outputId = "infoCounty"), br()
+        ), 
+        
         "Selected Category:", textOutput(outputId = "infoCategory"), br(),
-        "Selected Indicator:", textOutput(outputId = "infoIndicator")
+        
+        conditionalPanel("input.tabs != 2",
+                         "Selected Indicator:", textOutput(outputId = "infoIndicator")
+        )
       )
       
     ),
@@ -103,7 +118,8 @@ ui <- fluidPage(
           title = "Interactive-Maps", 
           h3(textOutput(outputId = "tab1selectedCategory")), # Show selected Category
           p(textOutput(outputId = "tab1selectedIndicator")), # Show selected Indicator
-          leafletOutput("mymap")
+          leafletOutput("mymap"),
+          value=1
         ),
         
         # WeiXin
@@ -111,12 +127,22 @@ ui <- fluidPage(
           title = "County-Infos", 
           h3(textOutput(outputId = "tab2selectedCounty")), # Show selected County / State
           p(textOutput(outputId = "tab2selectedCategory")), # Show selected Category
-          tableOutput(outputId = "tab2table")
+          tableOutput(outputId = "tab2table"),
+          value=2
           
         ),
         
         # BingShien
-        tabPanel("Key Indicator", "Infos by key indicator")
+        tabPanel(
+          title = "Key-Indicator", 
+          h3(textOutput(outputId = "tab3selectedCounty")), # Show selected County / State
+          p(textOutput(outputId = "tab3selectedCategory")), # Show selected Category
+          p(textOutput(outputId = "tab3selectedUnit")), # Show Measurement Units
+          plotOutput(outputId = "tab3barplot"),
+          br(),
+          plotlyOutput(outputId = "tab3pie"),
+          value=3
+        )
       )
     )
   )
@@ -143,7 +169,7 @@ server <- function(input, output, session) {
   ## TAB-1: 
   ## INTERACTIVE MAP
   observe({
-    if(input$tabs == "Interactive-Maps"){
+    if(input$tabs == "1"){
       
       output$tab1selectedCategory <- renderText(paste("Selected Category:", input$inCategory))
       output$tab1selectedIndicator <- renderText(paste("Information on", input$inIndicator,"in the US"))
@@ -172,14 +198,11 @@ server <- function(input, output, session) {
         else if(dfCategory=="df_STORES") {tmpDF <- df_STORES}
         ### XXX
         
-        # head(county_data)
         # county_data <- paste0("df_", filter(df,`Category Name`==input$inCategory) %>% distinct(`Category Code`))
         
         # temp_df <- select(county_data,FIPS,paste0(df$`Variable Code`[df$`Variable Name`==input$inIndicator]))
         temp_df <- select(tmpDF,FIPS,paste0(df$`Variable Code`[df$`Variable Name`==input$inIndicator]))
-        # print(head(temp_df,2))
         names(temp_df) <- c("FIPS", "variable")
-        # print(head(temp_df,2))
         leafmap3 <- merge(us.map.county, temp_df, by.x= 'FIPS', by.y='FIPS')
         
         popup_dat3 <- paste0("<strong>County: </strong>",
@@ -198,9 +221,9 @@ server <- function(input, output, session) {
                       color = "#BDBDC3",
                       weight = 1,
                       popup = popup_dat3) %>%
-          addLegend("bottomright", pal = pal, values = ~variable,
-                    title = paste0(filter(df,`Variable Name`==input$inIndicator) %>% distinct(`Variable Name`)),
-                    opacity = 0.5 )
+        addLegend("bottomright", pal = pal, values = ~variable,
+                  title = paste0(filter(df,`Variable Name`==input$inIndicator) %>% distinct(`Variable Name`)),
+                  opacity = 0.5 )
       })
       
     }
@@ -213,14 +236,14 @@ server <- function(input, output, session) {
   # TAB-2: County-Infos
   # Display all Variables for ONE particular County
   observe({
-    if(input$tabs == "County-Infos"){
+    if(input$tabs == "2"){
       
       #output$tab2selectedCounty <- renderText("NOTHING")
       #output$tab2selectedCategory <- renderText("NOTHING")
       
       output$tab2selectedCounty <- renderText(paste("Infos for", input$inCounty, "(County) in", input$inState, "(State)"))
       output$tab2selectedCategory <- renderText(paste("Selected Category:", input$inCategory))
-      
+
       dfCategory <- paste0("df_", filter(df,`Category Name`==input$inCategory) %>% distinct(`Category Code`))
       
       if(dfCategory=="df_ACCESS") {tmpDF <- df_ACCESS}
@@ -259,6 +282,74 @@ server <- function(input, output, session) {
     }
   })
   ### TAB-2 END
+  
+  # TAB-3: County-Infos
+  # Display all Variables for ONE particular County
+  observe({
+    if(input$tabs == "3"){
+      
+      output$tab3selectedCounty <- renderText(paste("How is the situation in", input$inState, "(State)?"))
+      output$tab3selectedCategory <- renderText(paste("Selected Category:", input$inCategory))
+      
+      varUnit <- df$Units[df$`Variable Name`==input$inIndicator]
+      output$tab3selectedUnit <- renderText(paste('Measurement units:', varUnit))
+      
+      dfCategory <- paste0("df_", filter(df,`Category Name`==input$inCategory) %>% distinct(`Category Code`))
+      
+      if(dfCategory=="df_ACCESS") {tmpDF <- df_ACCESS}
+      else if(dfCategory=="df_ASSISTANCE") {tmpDF <- df_ASSISTANCE}
+      else if(dfCategory=="df_HEALTH") {tmpDF <- df_HEALTH}
+      else if(dfCategory=="df_INSECURITY") {tmpDF <- df_INSECURITY}
+      else if(dfCategory=="df_LOCAL") {tmpDF <- df_LOCAL}
+      else if(dfCategory=="df_PRICES_TAXES") {tmpDF <- df_PRICES_TAXES}
+      else if(dfCategory=="df_RESTAURANTS") {tmpDF <- df_RESTAURANTS}
+      else if(dfCategory=="df_SOCIOECONOMIC") {tmpDF <- df_SOCIOECONOMIC}
+      else if(dfCategory=="df_STORES") {tmpDF <- df_STORES}
+      
+      # Render Plot 1
+      output$tab3barplot <- renderPlot({
+        
+        tmpIndicator <- df$`Variable Code`[df$`Variable Name`==input$inIndicator]
+        print(tmpIndicator)
+        
+        #filter data
+        test1 <- tmpDF %>% select(County, tmpIndicator) %>% filter(tmpDF[["State"]] == state.abb[which(state.name==input$inState)]) %>% arrange(desc(UQS(syms(tmpIndicator)))) %>% head(10)
+        print(test1)
+
+        # print(test1[[tmpIndicator]])
+        
+        #boxplot
+        bp = barplot(test1[[tmpIndicator]], ylab = input$inIndicator,  xlab = "County", main = paste0("Top 10 Locations Based on ", input$inIndicator))
+        text(x=bp[,1], y=-1, adj=c(1, 1), test1$County, cex=0.8, srt=45, xpd=TRUE)
+      })
+      
+      # Render Plot 2
+      output$tab3pie <- renderPlotly({
+        
+        tmpIndicator <- df$`Variable Code`[df$`Variable Name`==input$inIndicator]
+        print(tmpIndicator)
+        
+        #filter data
+        test1 <- tmpDF %>% select(County, tmpIndicator) %>% filter(tmpDF[["State"]] == state.abb[which(state.name==input$inState)]) %>% arrange(desc(UQS(syms(tmpIndicator)))) %>% head(10)
+        print(test1)
+        
+        print(test1[[tmpIndicator]])
+        print(test1[["County"]])
+        
+        #pie
+        # pie(test1[[tmpIndicator]], test1[["County"]], main = paste0("Top 10 County Based on ", input$inIndicator))
+        plot_ly(test1, labels = ~County, values = test1[[tmpIndicator]], type = 'pie') %>%
+                layout(title = paste0("Top 10 County Based on ", input$inIndicator),
+                       xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                        yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+        })
+      
+    } else {
+      output$tab3selectedCounty <- renderText("NOTHING")
+      output$tab3selectedCategory <- renderText("NOTHING")
+    }
+  })
+  ### TAB-3 END
   
 }
 
