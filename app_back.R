@@ -16,7 +16,7 @@ library(dplyr)
 library(plotly) # Plot graph
 
 ## PART-1: READING RAW-DATA
-
+  
 # df <- read_excel("input/DataDownload.xls", 2)
 # worksheet <- df %>% distinct(`Category Code`) %>% pull(`Category Code`)
 
@@ -71,14 +71,14 @@ ui <- fluidPage(
       
       conditionalPanel("input.tabs == 2",
                        uiOutput("in2County") #renderUI, based on State
-      ), 
+                       ), 
       
       selectInput(inputId = "inCategory", "Food-Environment Category:", choices = varCategory, selected = "Local Foods", multiple = FALSE),
-      
+
       conditionalPanel("input.tabs != 2",
                        uiOutput("in2Indicator") #renderUI, based on Category
       ), 
-      
+     
       br(),
       
       wellPanel(
@@ -91,7 +91,7 @@ ui <- fluidPage(
         
         conditionalPanel("input.tabs != 1",
                          "Selected State:", textOutput(outputId = "infoState"), br()
-                         
+                      
         ), 
         
         conditionalPanel("input.tabs == 2",
@@ -201,32 +201,29 @@ server <- function(input, output, session) {
         # county_data <- paste0("df_", filter(df,`Category Name`==input$inCategory) %>% distinct(`Category Code`))
         
         # temp_df <- select(county_data,FIPS,paste0(df$`Variable Code`[df$`Variable Name`==input$inIndicator]))
-        # print(df$`Variable Code`[df$`Variable Name`==input$inIndicator])
-        if(df$`Variable Code`[df$`Variable Name`==input$inIndicator] %in% colnames(tmpDF)){
-          temp_df <- select(tmpDF,FIPS,paste0(df$`Variable Code`[df$`Variable Name`==input$inIndicator]))
-          names(temp_df) <- c("FIPS", "variable")
-          leafmap3 <- merge(us.map.county, temp_df, by.x= 'FIPS', by.y='FIPS')
-          
-          popup_dat3 <- paste0("<strong>County: </strong>",
-                               leafmap3$NAME,
-                               "<br><strong>",paste0(filter(df,`Variable Name`==input$inIndicator) %>% distinct(`Variable Name`))," : </strong>",
-                               as.character(leafmap3$variable))
-          # pal <- colorQuantile("viridis", NULL, n = 5)
-          pal <- colorQuantile("Spectral", NULL, n = 10)
-          # pal <- colorNumeric("Spectral", NULL, n = 11)
-          
-          
-          leaflet(data = leafmap3) %>%
-            addTiles() %>%
-            addPolygons(fillColor = ~pal(variable),
-                        fillOpacity = 0.8,
-                        color = "#BDBDC3",
-                        weight = 1,
-                        popup = popup_dat3) %>%
-            addLegend("bottomright", pal = pal, values = ~variable,
-                      title = paste0(filter(df,`Variable Name`==input$inIndicator) %>% distinct(`Variable Name`)),
-                      opacity = 0.5 )
-        }
+        temp_df <- select(tmpDF,FIPS,paste0(df$`Variable Code`[df$`Variable Name`==input$inIndicator]))
+        names(temp_df) <- c("FIPS", "variable")
+        leafmap3 <- merge(us.map.county, temp_df, by.x= 'FIPS', by.y='FIPS')
+        
+        popup_dat3 <- paste0("<strong>County: </strong>",
+                             leafmap3$NAME,
+                             "<br><strong>",paste0(filter(df,`Variable Name`==input$inIndicator) %>% distinct(`Variable Name`))," : </strong>",
+                             as.character(leafmap3$variable))
+        # pal <- colorQuantile("viridis", NULL, n = 5)
+        pal <- colorQuantile("Spectral", NULL, n = 10)
+        # pal <- colorNumeric("Spectral", NULL, n = 11)
+        
+        
+        leaflet(data = leafmap3) %>%
+          addTiles() %>%
+          addPolygons(fillColor = ~pal(variable),
+                      fillOpacity = 0.8,
+                      color = "#BDBDC3",
+                      weight = 1,
+                      popup = popup_dat3) %>%
+        addLegend("bottomright", pal = pal, values = ~variable,
+                  title = paste0(filter(df,`Variable Name`==input$inIndicator) %>% distinct(`Variable Name`)),
+                  opacity = 0.5 )
       })
       
     }
@@ -246,7 +243,7 @@ server <- function(input, output, session) {
       
       output$tab2selectedCounty <- renderText(paste("Infos for", input$inCounty, "(County) in", input$inState, "(State)"))
       output$tab2selectedCategory <- renderText(paste("Selected Category:", input$inCategory))
-      
+
       dfCategory <- paste0("df_", filter(df,`Category Name`==input$inCategory) %>% distinct(`Category Code`))
       
       if(dfCategory=="df_ACCESS") {tmpDF <- df_ACCESS}
@@ -313,45 +310,39 @@ server <- function(input, output, session) {
       output$tab3barplot <- renderPlot({
         
         tmpIndicator <- df$`Variable Code`[df$`Variable Name`==input$inIndicator]
-        # print(tmpIndicator)
+        print(tmpIndicator)
         
         #filter data
-        if(tmpIndicator %in% colnames(tmpDF)){
-          test1 <- tmpDF %>% select(County, tmpIndicator) %>% filter(tmpDF[["State"]] == state.abb[which(state.name==input$inState)]) %>% arrange(desc(UQS(syms(tmpIndicator)))) %>% head(10)
-          # print(test1)
-          
-          # print(test1[[tmpIndicator]])
-          
-          #boxplot
-          bp = barplot(test1[[tmpIndicator]], ylab = input$inIndicator,  xlab = "County", main = paste0("Top 10 Locations Based on ", input$inIndicator))
-          text(x=bp[,1], y=-1, adj=c(1, 1), test1$County, cex=0.8, srt=45, xpd=TRUE)
-        }
+        test1 <- tmpDF %>% select(County, tmpIndicator) %>% filter(tmpDF[["State"]] == state.abb[which(state.name==input$inState)]) %>% arrange(desc(UQS(syms(tmpIndicator)))) %>% head(10)
+        print(test1)
+
+        # print(test1[[tmpIndicator]])
         
+        #boxplot
+        bp = barplot(test1[[tmpIndicator]], ylab = input$inIndicator,  xlab = "County", main = paste0("Top 10 Locations Based on ", input$inIndicator))
+        text(x=bp[,1], y=-1, adj=c(1, 1), test1$County, cex=0.8, srt=45, xpd=TRUE)
       })
       
       # Render Plot 2
       output$tab3pie <- renderPlotly({
         
         tmpIndicator <- df$`Variable Code`[df$`Variable Name`==input$inIndicator]
-        # print(tmpIndicator)
+        print(tmpIndicator)
         
         #filter data
-        if(tmpIndicator %in% colnames(tmpDF)){
-          test1 <- tmpDF %>% select(County, tmpIndicator) %>% filter(tmpDF[["State"]] == state.abb[which(state.name==input$inState)]) %>% arrange(desc(UQS(syms(tmpIndicator)))) %>% head(10)
-          # print(test1)
-          
-          # print(test1[[tmpIndicator]])
-          # print(test1[["County"]])
-          
-          #pie
-          # pie(test1[[tmpIndicator]], test1[["County"]], main = paste0("Top 10 County Based on ", input$inIndicator))
-          plot_ly(test1, labels = ~County, values = test1[[tmpIndicator]], type = 'pie') %>%
-            layout(title = paste0("Top 10 County Based on ", input$inIndicator),
-                   xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                   yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-        }
+        test1 <- tmpDF %>% select(County, tmpIndicator) %>% filter(tmpDF[["State"]] == state.abb[which(state.name==input$inState)]) %>% arrange(desc(UQS(syms(tmpIndicator)))) %>% head(10)
+        print(test1)
         
-      })
+        print(test1[[tmpIndicator]])
+        print(test1[["County"]])
+        
+        #pie
+        # pie(test1[[tmpIndicator]], test1[["County"]], main = paste0("Top 10 County Based on ", input$inIndicator))
+        plot_ly(test1, labels = ~County, values = test1[[tmpIndicator]], type = 'pie') %>%
+                layout(title = paste0("Top 10 County Based on ", input$inIndicator),
+                       xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                        yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+        })
       
     } else {
       output$tab3selectedCounty <- renderText("NOTHING")
